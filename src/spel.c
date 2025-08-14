@@ -15,7 +15,6 @@ int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO);
     IMG_Init(IMG_INIT_PNG);
 
-    // Stäng av suddig skalning (för pixelart)
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
     SDL_Window* window = SDL_CreateWindow("Plattformsspel i C",
@@ -24,7 +23,6 @@ int main(int argc, char* argv[]) {
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    // Ladda texturer
     SDL_Texture* backgroundTex = IMG_LoadTexture(renderer, "art/background.png");
     SDL_Texture* playerTex = IMG_LoadTexture(renderer, "art/player.png");
     SDL_Texture* groundTex = IMG_LoadTexture(renderer, "art/ground.png");
@@ -34,16 +32,17 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Spelare
     SDL_Rect player = {100, SCREEN_HEIGHT - 110, PLAYER_WIDTH, PLAYER_HEIGHT};
     int velocityY = 0;
     bool isJumping = false;
 
-    // Mark
     SDL_Rect ground = {0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50};
 
     bool running = true;
     SDL_Event event;
+
+    // 🔄 Ny variabel för riktning
+    bool facingRight = true;
 
     while (running) {
         while (SDL_PollEvent(&event)) {
@@ -51,13 +50,14 @@ int main(int argc, char* argv[]) {
                 running = false;
         }
 
-        // Input
         const Uint8* keystates = SDL_GetKeyboardState(NULL);
         if (keystates[SDL_SCANCODE_LEFT]) {
             player.x -= PLAYER_SPEED;
+            facingRight = false; // ⬅️ Vänd åt vänster
         }
         if (keystates[SDL_SCANCODE_RIGHT]) {
             player.x += PLAYER_SPEED;
+            facingRight = true; // ➡️ Vänd åt höger
         }
         if (keystates[SDL_SCANCODE_SPACE]) {
             if (!isJumping) {
@@ -66,36 +66,31 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        // Gravitation
         velocityY += GRAVITY;
         player.y += velocityY;
 
-        // Kollision med mark
         if (player.y + PLAYER_HEIGHT >= ground.y) {
             player.y = ground.y - PLAYER_HEIGHT;
             velocityY = 0;
             isJumping = false;
         }
 
-        // Rendera
         SDL_RenderClear(renderer);
 
-        // Bakgrund
         SDL_Rect bgRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
         SDL_RenderCopy(renderer, backgroundTex, NULL, &bgRect);
 
-        // Mark
         SDL_RenderCopy(renderer, groundTex, NULL, &ground);
 
-        // Spelare
-        SDL_RenderCopy(renderer, playerTex, NULL, &player);
+        // Rendera spelaren med spegelvändning
+        SDL_RendererFlip flip = facingRight ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
+        SDL_RenderCopyEx(renderer, playerTex, NULL, &player, 0, NULL, flip);
 
         SDL_RenderPresent(renderer);
 
-        SDL_Delay(16); // Ca 60 FPS
+        SDL_Delay(16);
     }
 
-    // Rensa upp
     SDL_DestroyTexture(backgroundTex);
     SDL_DestroyTexture(playerTex);
     SDL_DestroyTexture(groundTex);
@@ -107,4 +102,3 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
-
