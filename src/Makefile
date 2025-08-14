@@ -4,8 +4,8 @@ CC = gcc
 CFLAGS = -Wall
 LDFLAGS = -lSDL2 -lSDL2_image
 
-SRC = spel.c
-OUT = spel
+SRC = src/spel.c
+OUT = spel-build
 
 all: $(OUT)
 

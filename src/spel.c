@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
     SDL_Texture* backgroundTex = IMG_LoadTexture(renderer, "art/background.png");
-    SDL_Texture* playerTex = IMG_LoadTexture(renderer, "art/player.png");
+    SDL_Texture* playerTex = IMG_LoadTexture(renderer, "art/player-sprites/idle_player.png");
     SDL_Texture* groundTex = IMG_LoadTexture(renderer, "art/ground.png");
 
     if (!backgroundTex || !playerTex || !groundTex) {
