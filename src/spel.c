@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
-    SDL_Window* window = SDL_CreateWindow("Plattformsspel i C",
+    SDL_Window* window = SDL_CreateWindow("spel i C",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         SCREEN_WIDTH, SCREEN_HEIGHT, 0);
 
