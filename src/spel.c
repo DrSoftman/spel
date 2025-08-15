@@ -5,11 +5,14 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 
-#define PLAYER_WIDTH 90
+#define PLAYER_WIDTH 90 
 #define PLAYER_HEIGHT 100
-#define PLAYER_SPEED 5
+#define PLAYER_SPEED 6
 #define JUMP_FORCE 15
 #define GRAVITY 1
+
+#define WALK_FRAME_COUNT 2 // Ändra talet beroende på hur många fler animationframes du vill ha
+#define ANIMATION_SPEED 10
 
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO);
@@ -23,19 +26,29 @@ int main(int argc, char* argv[]) {
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
+    // Ladda texturer
     SDL_Texture* backgroundTex = IMG_LoadTexture(renderer, "art/background.png");
     SDL_Texture* idleTex = IMG_LoadTexture(renderer, "art/player-sprites/idle_player.png");
-    SDL_Texture* walkFrame1Tex = IMG_LoadTexture(renderer, "art/player-sprites/frame1_walk_player.png");
-    SDL_Texture* walkFrame2Tex = IMG_LoadTexture(renderer, "art/player-sprites/frame2_walk_player.png");
     SDL_Texture* groundTex = IMG_LoadTexture(renderer, "art/ground.png");
 
-    SDL_Texture* currentPlayerTex = idleTex;
+    // Ladda gångframes
+    SDL_Texture* walkFrames[WALK_FRAME_COUNT];
+    walkFrames[0] = IMG_LoadTexture(renderer, "art/player-sprites/frame1_walk_player.png");
+    walkFrames[1] = IMG_LoadTexture(renderer, "art/player-sprites/frame2_walk_player.png");
 
-    if (!backgroundTex || !idleTex || !walkFrame1Tex || !walkFrame2Tex || !groundTex) {
-        SDL_Log("Kunde inte ladda texturer: %s", SDL_GetError());
+    // Kontrollera texturer
+    if (!backgroundTex || !idleTex || !groundTex) {
+        SDL_Log("Kunde inte ladda bakgrund eller idle-textur: %s", SDL_GetError());
         return 1;
     }
+    for (int i = 0; i < WALK_FRAME_COUNT; i++) {
+        if (!walkFrames[i]) {
+            SDL_Log("Kunde inte ladda gångtextur %d: %s", i, SDL_GetError());
+            return 1;
+        }
+    }
 
+    // Spelarens egenskaper
     SDL_Rect player = {100, SCREEN_HEIGHT - 110, PLAYER_WIDTH, PLAYER_HEIGHT};
     int velocityY = 0;
     bool isJumping = false;
@@ -45,13 +58,10 @@ int main(int argc, char* argv[]) {
     bool running = true;
     SDL_Event event;
 
-    // Riktning
     bool facingRight = true;
-
-    // Animation
     int animationTimer = 0;
     int animationFrame = 0;
-    const int ANIMATION_SPEED = 10;
+    SDL_Texture* currentPlayerTex = idleTex;
 
     while (running) {
         while (SDL_PollEvent(&event)) {
@@ -94,13 +104,9 @@ int main(int argc, char* argv[]) {
             animationTimer++;
             if (animationTimer >= ANIMATION_SPEED) {
                 animationTimer = 0;
-                animationFrame = (animationFrame + 1) % 2;
+                animationFrame = (animationFrame + 1) % WALK_FRAME_COUNT;
             }
-
-            if (animationFrame == 0)
-                currentPlayerTex = walkFrame1Tex;
-            else
-                currentPlayerTex = walkFrame2Tex;
+            currentPlayerTex = walkFrames[animationFrame];
         } else {
             currentPlayerTex = idleTex;
             animationTimer = 0;
@@ -124,9 +130,11 @@ int main(int argc, char* argv[]) {
     // Rensa resurser
     SDL_DestroyTexture(backgroundTex);
     SDL_DestroyTexture(idleTex);
-    SDL_DestroyTexture(walkFrame1Tex);
-    SDL_DestroyTexture(walkFrame2Tex);
     SDL_DestroyTexture(groundTex);
+    for (int i = 0; i < WALK_FRAME_COUNT; i++) {
+        SDL_DestroyTexture(walkFrames[i]);
+    }
+
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 
