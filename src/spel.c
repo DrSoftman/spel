@@ -11,7 +11,7 @@
 #define JUMP_FORCE 15
 #define GRAVITY 1
 
-#define WALK_FRAME_COUNT 2 // Ändra talet beroende på hur många fler animationframes du vill ha
+#define WALK_FRAME_COUNT 2 //Ändra talet beroende på hur många fler animationframes du vill ha
 #define ANIMATION_SPEED 10
 
 int main(int argc, char* argv[]) {
