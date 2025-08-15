@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdbool.h>
+#include <math.h>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -10,6 +11,10 @@
 #define PLAYER_SPEED 6
 #define JUMP_FORCE 15
 #define GRAVITY 1
+
+// Add camera smoothing constants
+#define CAMERA_SMOOTHING 0.05f
+#define CAMERA_DEADZONE 150
 
 #define WALK_FRAME_COUNT 2 // Ändra talet beroende på hur många fler animationframes du vill ha
 #define ANIMATION_SPEED 10
@@ -55,6 +60,12 @@ int main(int argc, char* argv[]) {
 
     SDL_Rect ground = {0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50};
 
+    // Add camera position variables
+    float cameraX = 0;
+    float cameraY = 0;
+    float targetCameraX = 0;
+    float targetCameraY = 0;
+
     bool running = true;
     SDL_Event event;
 
@@ -99,6 +110,22 @@ int main(int argc, char* argv[]) {
             isJumping = false;
         }
 
+        // Update camera target position (center on player)
+        targetCameraX = player.x - SCREEN_WIDTH / 2 + PLAYER_WIDTH / 2;
+        targetCameraY = player.y - SCREEN_HEIGHT / 2 + PLAYER_HEIGHT / 2;
+
+        // Apply camera smoothing with deadzone
+        if (fabs(targetCameraX - cameraX) > CAMERA_DEADZONE) {
+            cameraX += (targetCameraX - cameraX) * CAMERA_SMOOTHING;
+        }
+        if (fabs(targetCameraY - cameraY) > CAMERA_DEADZONE) {
+            cameraY += (targetCameraY - cameraY) * CAMERA_SMOOTHING;
+        }
+
+        // Clamp camera to world bounds (optional)
+        if (cameraX < 0) cameraX = 0;
+        if (cameraY < 0) cameraY = 0;
+
         // Animation uppdatering
         if (isWalking) {
             animationTimer++;
@@ -116,12 +143,51 @@ int main(int argc, char* argv[]) {
         // Rendering
         SDL_RenderClear(renderer);
 
-        SDL_Rect bgRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-        SDL_RenderCopy(renderer, backgroundTex, NULL, &bgRect);
-        SDL_RenderCopy(renderer, groundTex, NULL, &ground);
+        // Render repeating background with camera offset
+        // Calculate how many background tiles we need to cover the screen
+        int bgWidth = SCREEN_WIDTH;
+        int bgHeight = SCREEN_HEIGHT;
+        
+        // Calculate the starting position for the first background tile
+        int startX = (int)cameraX % bgWidth;
+        int startY = (int)cameraY % bgHeight;
+        
+        // Render multiple background tiles to cover the entire screen
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                SDL_Rect bgRect = {
+                    x * bgWidth - startX,
+                    y * bgHeight - startY,
+                    bgWidth,
+                    bgHeight
+                };
+                SDL_RenderCopy(renderer, backgroundTex, NULL, &bgRect);
+            }
+        }
+        
+        // Render repeating ground with camera offset
+        // Calculate how many ground tiles we need to cover the screen width
+        int groundWidth = SCREEN_WIDTH;
+        int groundHeight = 50; // Height of the ground
+        
+        // Calculate the starting position for the first ground tile
+        int groundStartX = (int)cameraX % groundWidth;
+        
+        // Render multiple ground tiles to cover the entire screen width
+        for (int x = -1; x <= 1; x++) {
+            SDL_Rect groundOffset = {
+                x * groundWidth - groundStartX,
+                ground.y - (int)cameraY,
+                groundWidth,
+                groundHeight
+            };
+            SDL_RenderCopy(renderer, groundTex, NULL, &groundOffset);
+        }
 
+        // Render player with camera offset
+        SDL_Rect playerOffset = {player.x - (int)cameraX, player.y - (int)cameraY, player.w, player.h};
         SDL_RendererFlip flip = facingRight ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
-        SDL_RenderCopyEx(renderer, currentPlayerTex, NULL, &player, 0, NULL, flip);
+        SDL_RenderCopyEx(renderer, currentPlayerTex, NULL, &playerOffset, 0, NULL, flip);
 
         SDL_RenderPresent(renderer);
         SDL_Delay(16); // cirka 60 FPS
