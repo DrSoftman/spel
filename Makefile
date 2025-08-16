@@ -1,4 +1,4 @@
-# Makefile för SDL2-spel med SDL2_image
+# Makefile for SDL2-gamae with SDL2_image
 
 CC = gcc
 CFLAGS = -Wall
@@ -11,6 +11,9 @@ all: $(OUT)
 
 $(OUT): $(SRC)
 	$(CC) $(CFLAGS) $(SRC) -o $(OUT) $(LDFLAGS)
+
+run: $(OUT)
+	./$(OUT)
 
 clean:
 	rm -f $(OUT)
