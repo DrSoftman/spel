@@ -13,7 +13,7 @@
 #define CAMERA_SMOOTHING 0.05f
 #define CAMERA_DEADZONE 150
 
-#define WALK_FRAME_COUNT 2
+#define WALK_FRAME_COUNT 2 // increment if more frames will be added
 #define ANIMATION_SPEED 10
 
 
