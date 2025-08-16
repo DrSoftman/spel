@@ -2,22 +2,7 @@
 #include <SDL2/SDL_image.h>
 #include <stdbool.h>
 #include <math.h>
-
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
-
-#define PLAYER_WIDTH 90 
-#define PLAYER_HEIGHT 100
-#define PLAYER_SPEED 6
-#define JUMP_FORCE 15
-#define GRAVITY 1
-
-// Add camera smoothing constants
-#define CAMERA_SMOOTHING 0.05f
-#define CAMERA_DEADZONE 150
-
-#define WALK_FRAME_COUNT 2 // Ändra talet beroende på hur många fler animationframes du vill ha
-#define ANIMATION_SPEED 10
+#include "../include/spel.h" // game macros
 
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO);
