@@ -10,35 +10,35 @@ int main(int argc, char* argv[]) {
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
-    SDL_Window* window = SDL_CreateWindow("spel i C",
+    SDL_Window* window = SDL_CreateWindow("spel",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         SCREEN_WIDTH, SCREEN_HEIGHT, 0);
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    // Ladda texturer
+    // Load textures
     SDL_Texture* backgroundTex = IMG_LoadTexture(renderer, "art/background.png");
     SDL_Texture* idleTex = IMG_LoadTexture(renderer, "art/player-sprites/idle_player.png");
     SDL_Texture* groundTex = IMG_LoadTexture(renderer, "art/ground.png");
 
-    // Ladda gångframes
+    // Load walk cycle frames
     SDL_Texture* walkFrames[WALK_FRAME_COUNT];
     walkFrames[0] = IMG_LoadTexture(renderer, "art/player-sprites/frame1_walk_player.png");
     walkFrames[1] = IMG_LoadTexture(renderer, "art/player-sprites/frame2_walk_player.png");
 
-    // Kontrollera texturer
+    // Control textures
     if (!backgroundTex || !idleTex || !groundTex) {
-        SDL_Log("Kunde inte ladda bakgrund eller idle-textur: %s", SDL_GetError());
+        SDL_Log("Could not load background or idle-textur: %s", SDL_GetError());
         return 1;
     }
     for (int i = 0; i < WALK_FRAME_COUNT; i++) {
         if (!walkFrames[i]) {
-            SDL_Log("Kunde inte ladda gångtextur %d: %s", i, SDL_GetError());
+            SDL_Log("Could not load walktexture %d: %s", i, SDL_GetError());
             return 1;
         }
     }
 
-    // Spelarens egenskaper
+    // The player's properties
     SDL_Rect player = {100, SCREEN_HEIGHT - 110, PLAYER_WIDTH, PLAYER_HEIGHT};
     int velocityY = 0;
     bool isJumping = false;
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        // Gravitationslogik
+        // Gravitation logic
         velocityY += GRAVITY;
         player.y += velocityY;
 
@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
         if (cameraX < 0) cameraX = 0;
         if (cameraY < 0) cameraY = 0;
 
-        // Animation uppdatering
+        // Animation updating
         if (isWalking) {
             animationTimer++;
             if (animationTimer >= ANIMATION_SPEED) {
@@ -178,7 +178,7 @@ int main(int argc, char* argv[]) {
         SDL_Delay(16); // cirka 60 FPS
     }
 
-    // Rensa resurser
+    // Clean resources
     SDL_DestroyTexture(backgroundTex);
     SDL_DestroyTexture(idleTex);
     SDL_DestroyTexture(groundTex);
